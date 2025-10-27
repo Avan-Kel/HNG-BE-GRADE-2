@@ -34,6 +34,11 @@ async function ensureTable() {
 // Start server only after table exists
 ensureTable()
   .then(() => {
+    // 👇 Add homepage route
+    app.get('/', (req, res) => {
+      res.json({ message: 'Welcome to the Countries API!', info: 'Use /countries to fetch data' });
+    });
+
     app.use('/', countryRoutes);
 
     // Global error handler
