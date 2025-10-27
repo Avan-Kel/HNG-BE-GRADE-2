@@ -67,9 +67,19 @@ async function status(req, res) {
 async function getImage(req, res) {
   try {
     const imagePath = path.resolve('cache/summary.png');
+
+    // Generate image if missing
     if (!fs.existsSync(imagePath)) {
-      return res.status(404).json({ error: 'Summary image not found' });
+      const countries = await countryModel.getAllCountries({}, 'gdp_desc');
+      if (!countries || countries.length === 0) {
+        return res.status(404).json({ error: 'No country data available to generate image' });
+      }
+
+      const { generateSummaryImage } = require('../utils/imageGenerator');
+      await generateSummaryImage(countries);
     }
+
+    res.setHeader('Content-Type', 'image/png');
     res.sendFile(imagePath);
   } catch (err) {
     console.error('Get image error:', err);

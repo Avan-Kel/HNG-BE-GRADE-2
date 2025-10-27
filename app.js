@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 const countryRoutes = require('./routes/countryRoutes');
 const db = require('./utils/db');
@@ -8,7 +9,8 @@ const app = express();
 app.use(express.json());
 
 // Ensure cache directory exists
-if (!fs.existsSync('cache')) fs.mkdirSync('cache');
+const cacheDir = path.resolve('cache');
+if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
 
 // --- Automatically create countries table ---
 async function ensureTable() {
@@ -34,17 +36,30 @@ async function ensureTable() {
 // Start server only after table exists
 ensureTable()
   .then(() => {
-    // 👇 Add homepage route
+    // --- Homepage ---
     app.get('/', (req, res) => {
-      res.json({ message: 'Welcome to the Countries API!', info: 'Use /countries to fetch data' });
+      res.json({
+        message: 'Welcome to the Countries API!',
+        info: 'Use /countries to fetch data and /status for refresh info'
+      });
     });
 
+    // --- Country routes ---
     app.use('/', countryRoutes);
 
-    // Global error handler
+    // --- Serve summary image ---
+    app.get('/countries/image', (req, res) => {
+      const imagePath = path.join(cacheDir, 'summary.png');
+      if (!fs.existsSync(imagePath)) {
+        return res.status(404).json({ error: 'Summary image not found' });
+      }
+      res.sendFile(imagePath);
+    });
+
+    // --- Global error handler ---
     app.use((err, req, res, next) => {
       console.error(err);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
     });
 
     const PORT = process.env.PORT || 3000;
