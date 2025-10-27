@@ -26,8 +26,18 @@ The API can refresh data, fetch single countries, and serve data for frontend us
 - **Railway.app** for hosting
 
 ---
+## Dependencies and their installation 
+| Package   | Purpose                          |
+| --------- | -------------------------------- |
+| `express` | Web framework for Node.js        |
+| `mysql2`  | MySQL client                     |
+| `dotenv`  | Load environment variables       |
+| `axios`   | HTTP requests to external APIs   |
+| `canvas`  | Generate images (summary charts) |
 
-## Setup Instructions
+- npm install express mysql2 dotenv axios canvas
+
+
 
 ### Clone the repository
 ```bash
